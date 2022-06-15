@@ -2,7 +2,9 @@ name: Owasp Workflow
 
 on:
   workflow_dispatch:
-
+  defaults:
+    run:
+      working-directory: /github/workspace/reports/
 jobs:
   action:
     runs-on: ubuntu-latest
@@ -25,4 +27,4 @@ jobs:
         uses: actions/upload-artifact@master
         with:
            name: owasp_report
-           path: github/workspace/reports/
+           path: reports/
