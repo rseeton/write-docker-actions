@@ -9,10 +9,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v1
-
-      - name: hello-action
-        uses: ./.github/actions/hello-world
-       
+     
       - name: owasp_check
         uses: ./.github/actions/owasp
         id: owasp
