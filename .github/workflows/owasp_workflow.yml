@@ -2,12 +2,13 @@ name: Owasp Workflow
 
 on:
   workflow_dispatch:
-  defaults:
-    run:
-      working-directory: /github/workspace/reports/
 jobs:
   action:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: /github/workspace/reports/
+
 
     steps:
       - uses: actions/checkout@v1
