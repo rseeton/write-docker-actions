@@ -1,0 +1,34 @@
+name: Owasp Workflow
+
+on:
+  workflow_dispatch:
+
+jobs:
+  action:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: hello-action
+        uses: ./.github/actions/hello-world
+
+      - name: Build project with Maven
+        run: mvn clean install
+        
+      - name: Owasp Check
+        uses: ./.github/actions/owasp
+        id: Owasp Check
+        with:
+          project: 'test'
+          path: '.'
+          format: 'HTML'    
+          args: >
+            --failOnCVSS 7
+            --enableRetired
+            
+      - name: Upload Test results
+        uses: actions/upload-artifact@master
+        with:
+           name: Depcheck report
+           path: ${{github.workspace}}/reports
