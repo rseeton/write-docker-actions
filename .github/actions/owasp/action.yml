@@ -1,0 +1,35 @@
+#Based on dependency-check/Dependency-Check_Action is licensed under the MIT License
+
+name: 'Owasp Check'
+description: 'Pull latest dependency_check docker and run package file'
+Author: 'Richard Seeton'
+#Original design Author: 'javixeneize'
+branding:
+  icon: 'shield'  
+  color: 'red'
+inputs:
+    project:
+        required: true
+    path:
+        required: true  
+    format:
+        required: false
+        default: "HTML"
+    args:
+        required: false
+runs:
+    using: 'docker'
+    image: 'Dockerfile'
+    args:
+
+        - '--project'
+        - '${{ inputs.project }}'
+        - '--scan'
+        - '${{ inputs.path }}'
+        - '--format' 
+        - '${{ inputs.format }}'
+        - '--out'
+        -  '/github/workspace/reports'
+        - '--noupdate'
+        - ${{ inputs.args }}
+
