@@ -12,10 +12,7 @@ jobs:
 
       - name: hello-action
         uses: ./.github/actions/hello-world
-
-      - name: Build project with Maven
-        run: mvn clean install
-        
+       
       - name: owasp_check
         uses: ./.github/actions/owasp
         id: owasp
