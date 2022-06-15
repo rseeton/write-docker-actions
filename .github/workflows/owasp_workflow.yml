@@ -13,8 +13,8 @@ jobs:
       - name: hello-action
         uses: ./.github/actions/hello-world
 
-      - name: Build project with Maven
-        run: mvn clean install
+#      - name: Build project with Maven
+#        run: mvn clean install
         
       - name: Owasp Check
         uses: ./.github/actions/owasp
