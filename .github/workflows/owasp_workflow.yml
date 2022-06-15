@@ -13,5 +13,22 @@ jobs:
       - name: hello-action
         uses: ./.github/actions/hello-world
 
-      - name: dependency_check
-        uses: ./.github/actions/dependency_check
+      - name: Build project with Maven
+        run: mvn clean install
+        
+      - name: Owasp Check
+        uses: ./.github/actions/owasp
+        id: Owasp Check
+        with:
+          project: 'test'
+          path: '.'
+          format: 'HTML'    
+          args: >
+            --failOnCVSS 7
+            --enableRetired
+            
+      - name: Upload Test results
+        uses: actions/upload-artifact@master
+        with:
+           name: Depcheck report
+           path: ${{github.workspace}}/reports
