@@ -16,9 +16,9 @@ jobs:
       - name: Build project with Maven
         run: mvn clean install
         
-      - name: Owasp Check
+      - name: owasp_check
         uses: ./.github/actions/owasp
-        id: Owasp Check
+        id: owasp
         with:
           project: 'test'
           path: '.'
