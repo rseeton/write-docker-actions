@@ -53,6 +53,7 @@ jobs:
           npm install packageurl-js
           
       - name: Parse Package URL
+        continue-on-error: true
         id: purl-parser
         uses: actions/github-script@v6.4.0
         env:
@@ -78,5 +79,5 @@ jobs:
                 repo: context.repo.repo,
                 labels: ['pending more information']
               })
-              throw new Warning('Invalid package url');
+              throw new Error('Invalid package url');
             }
