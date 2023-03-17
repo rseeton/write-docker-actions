@@ -117,9 +117,6 @@ jobs:
                 repo: context.repo.repo
               })
 
-      - name: Echo Context
-        run: echo "$GITHUB_CONTEXT"
-
       - name: Dump GitHub context
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
@@ -159,13 +156,17 @@ jobs:
         uses: actions/github-script@v6.4.0
         with:
           script: |
-              #console.log(github.event.issue.labels);
               github.rest.issues.addLabels({
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 labels: ['pending more information']
               })
+
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
 
       - name: Show Issue 3
         if: contains(github.event.issue.labels.*.name, 'pending more information')
