@@ -40,7 +40,6 @@ jobs:
         uses: actions/github-script@v6.4.0
         with:
           script: |
-              console.log(github.event.issue.labels);
               github.rest.issues.removeLabel({
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
