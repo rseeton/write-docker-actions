@@ -80,6 +80,7 @@ jobs:
             return pkg;
 
       - name: Show Issue 2
+        if: contains(github.event.issue.labels.*.name, 'pending more information')
         uses: actions/github-script@v6.4.0
         with:
           script: |
@@ -114,6 +115,7 @@ jobs:
               throw new Error('Invalid package url');
 
       - name: Show Issue 3
+        if: contains(github.event.issue.labels.*.name, 'pending more information')
         uses: actions/github-script@v6.4.0
         with:
           script: |
