@@ -86,7 +86,7 @@ jobs:
           PURL: ${{ fromJSON(steps.issue-parser.outputs.jsonString).purl }}
         with:
           script: |
-              console.log(ex);
+              console.log(github.event.issue.labels);
               await github.rest.issues.createComment({
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
