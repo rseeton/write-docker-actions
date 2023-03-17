@@ -103,15 +103,16 @@ jobs:
                 repo: context.repo.repo
               })
 
+      - name: Echo Context
+        run: echo "$GITHUB_CONTEXT"
+
       - name: Parse Package URL Failed
         if: steps.purl-parser.outcome != 'success'
         id: purl-parser-failure
         uses: actions/github-script@v6.4.0
-        env:
-          PURL: ${{ fromJSON(steps.issue-parser.outputs.jsonString).purl }}
         with:
           script: |
-              console.log(github.event.issue.labels);
+              #console.log(github.event.issue.labels);
               github.rest.issues.addLabels({
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
