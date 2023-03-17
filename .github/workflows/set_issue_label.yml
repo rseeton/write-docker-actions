@@ -54,6 +54,7 @@ jobs:
           path: odc
 
       - name: Parse False Positive Issue
+        if: contains(github.event.issue.labels.*.name, 'pending more information')
         uses: stefanbuck/github-issue-parser@v3
         id: issue-parser
         with:
