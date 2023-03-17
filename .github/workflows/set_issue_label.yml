@@ -13,7 +13,7 @@ jobs:
       issues: write
     steps:
 
-      - name: Show Issue
+      - name: Show Issue 1
         if: contains(github.event.issue.labels.*.name, 'pending more information')
         uses: actions/github-script@v6.4.0
         with:
@@ -72,12 +72,19 @@ jobs:
           PURL: ${{ fromJSON(steps.issue-parser.outputs.jsonString).purl }}
         with:
           script: |
-            try {
-                const { PackageURL } = require('packageurl-js');
-                const pkg = PackageURL.fromString(process.env.PURL.trim().replaceAll(/^`|`$/g,''));
-                console.log(pkg);
-                return pkg;
-            } catch (ex) {
+            const { PackageURL } = require('packageurl-js');
+            const pkg = PackageURL.fromString(process.env.PURL.trim().replaceAll(/^`|`$/g,''));
+            console.log(pkg);
+            return pkg;
+            
+        - name: Parse Package URL Failed
+        if: steps.purl-parser.outcome != 'success'
+        id: purl-parser-failure
+        uses: actions/github-script@v6.4.0
+        env:
+          PURL: ${{ fromJSON(steps.issue-parser.outputs.jsonString).purl }}
+        with:
+          script: |          
               console.log(ex);
               await github.rest.issues.createComment({
                 issue_number: context.issue.number,
@@ -92,4 +99,15 @@ jobs:
                 labels: ['pending more information']
               })
               throw new Error('Invalid package url');
-            }
+              
+      - name: Show Issue 2
+        uses: actions/github-script@v6.4.0
+        with:
+          script: |
+              console.log(github.event.issue.labels);
+              github.rest.issues.get({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo
+              })
+
