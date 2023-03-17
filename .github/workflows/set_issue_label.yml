@@ -39,16 +39,6 @@ jobs:
                 name: 'pending more information'
               })
 
-      - uses: actions/github-script@v6
-        with:
-          script: |
-            github.rest.issues.addLabels({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              labels: ["triage"]
-            })
-
       - uses: actions/checkout@v3
         with:
           path: odc
@@ -64,6 +54,30 @@ jobs:
         run: |
           npm init -y
           npm install packageurl-js
+
+      - name: Assign triage Label
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.addLabels({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: ["triage"]
+            })
+
+      - name: Assign PURL Label
+        uses: actions/github-script@v6
+        env:
+          PURL: ${{ fromJSON(steps.issue-parser.outputs.jsonString).purl }}
+        with:
+          script: |
+            github.rest.issues.addLabels({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: [fromString(process.env.PURL.trim()]
+            })
 
       - name: Parse Package URL
         if: contains(github.event.issue.labels.*.name, 'pending more information')
