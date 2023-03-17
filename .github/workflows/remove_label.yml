@@ -19,3 +19,14 @@ jobs:
               repo: context.repo.repo,
               name: 'triage'
             })
+            
+      - uses: actions/checkout@v3
+        with:
+          path: odc
+          
+      - name: Parse False Positive Issue
+        uses: stefanbuck/github-issue-parser@v3
+        id: issue-parser
+        with:
+          issue-body: ${{ github.event.issue.body }}
+          template-path: odc/.github/ISSUE_TEMPLATE/false-positive-report.yml
