@@ -54,7 +54,6 @@ jobs:
           path: odc
 
       - name: Parse False Positive Issue
-        if: contains(github.event.issue.labels.*.name, 'pending more information')
         uses: stefanbuck/github-issue-parser@v3
         id: issue-parser
         with:
@@ -67,6 +66,7 @@ jobs:
           npm install packageurl-js
 
       - name: Parse Package URL
+        if: contains(github.event.issue.labels.*.name, 'pending more information')
         continue-on-error: true
         id: purl-parser
         uses: actions/github-script@v6.4.0
