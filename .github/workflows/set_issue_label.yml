@@ -13,6 +13,18 @@ jobs:
       issues: write
     steps:
 
+      - name: Show Issue
+        if: contains(github.event.issue.labels.*.name, 'pending more information')
+        uses: actions/github-script@v6.4.0
+        with:
+          script: |
+              console.log(github.event.issue.labels);
+              github.rest.issues.get({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo
+              })
+
       - name: Remove Labels
         if: contains(github.event.issue.labels.*.name, 'pending more information')
         uses: actions/github-script@v6.4.0
