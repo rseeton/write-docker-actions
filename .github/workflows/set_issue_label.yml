@@ -15,7 +15,7 @@ jobs:
     steps:
 
       - name: Show Issue 1
-        if: contains(github.event.issue.labels.*.name, 'pending more information')
+        #if: contains(github.event.issue.labels.*.name, 'pending more information')
         uses: actions/github-script@v6.4.0
         with:
           script: |
@@ -78,6 +78,17 @@ jobs:
             console.log(pkg);
             return pkg;
 
+      - name: Show Issue 2
+        uses: actions/github-script@v6.4.0
+        with:
+          script: |
+              console.log(github.event.issue.labels);
+              github.rest.issues.get({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo
+              })
+
       - name: Parse Package URL Failed
         if: steps.purl-parser.outcome != 'success'
         id: purl-parser-failure
@@ -101,7 +112,7 @@ jobs:
               })
               throw new Error('Invalid package url');
 
-      - name: Show Issue 2
+      - name: Show Issue 3
         uses: actions/github-script@v6.4.0
         with:
           script: |
