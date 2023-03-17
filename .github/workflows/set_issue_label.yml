@@ -76,7 +76,7 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              labels: [fromString(process.env.PURL.trim())]
+              labels: [process.env.PURL]
             })
 
       - name: Parse Package URL
