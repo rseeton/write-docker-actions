@@ -47,6 +47,11 @@ jobs:
           issue-body: ${{ github.event.issue.body }}
           template-path: odc/.github/ISSUE_TEMPLATE/false-positive-report.yml
           
+      - name: Initialize npm
+        run: |
+          npm init -y
+          npm install packageurl-js
+          
       - name: Parse Package URL
         id: purl-parser
         uses: actions/github-script@v6.4.0
