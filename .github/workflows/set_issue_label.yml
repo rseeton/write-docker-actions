@@ -29,7 +29,7 @@ jobs:
         uses: actions/github-script@v6.4.0
         with:
           script: |
-              console.log(github.rest.issues.events);
+              console.log(github.rest.issues.comments);
               github.rest.issues.listEventsForTimeline({
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
