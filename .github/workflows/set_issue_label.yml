@@ -4,12 +4,28 @@ on:
     types:
       - reopened
       - opened
+      - edited
+      
 jobs:
   label_issues:
     runs-on: ubuntu-latest
     permissions:
       issues: write
     steps:
+    
+      - name: Remove Labels
+        if: contains(github.event.issue.labels.*.name, 'pending more information')
+        uses: actions/github-script@v6.4.0
+        with:
+          script: |
+              console.log(github.event.issue.labels);
+              github.rest.issues.removeLabel({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                name: 'pending more information'
+              })
+
       - uses: actions/github-script@v6
         with:
           script: |
@@ -19,3 +35,43 @@ jobs:
               repo: context.repo.repo,
               labels: ["triage"]
             })
+            
+      - uses: actions/checkout@v3
+        with:
+          path: odc
+          
+      - name: Parse False Positive Issue
+        uses: stefanbuck/github-issue-parser@v3
+        id: issue-parser
+        with:
+          issue-body: ${{ github.event.issue.body }}
+          template-path: odc/.github/ISSUE_TEMPLATE/false-positive-report.yml
+          
+      - name: Parse Package URL
+        id: purl-parser
+        uses: actions/github-script@v6.4.0
+        env:
+          PURL: ${{ fromJSON(steps.issue-parser.outputs.jsonString).purl }}
+        with:
+          script: |
+            try {
+                const { PackageURL } = require('packageurl-js');
+                const pkg = PackageURL.fromString(process.env.PURL.trim().replaceAll(/^`|`$/g,''));
+                console.log(pkg);
+                return pkg;
+            } catch (ex) {
+              console.log(ex);
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: 'Error parsing package url: ' + process.env.PURL + '.\n\nError: ' + ex + '\n\nPlease correct the package URL - consider copying the package url from the HTML report.'
+              })
+              github.rest.issues.addLabels({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                labels: ['pending more information']
+              })
+              throw new Error('Invalid package url');
+            }
