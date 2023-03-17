@@ -73,11 +73,23 @@ jobs:
         env:
           PURL: ${{ fromJSON(steps.issue-parser.outputs.jsonString).purl }}
         with:
-          script: |
-            const { PackageURL } = require('packageurl-js');
-            const pkg = PackageURL.fromString(process.env.PURL.trim().replaceAll(/^`|`$/g,''));
-            console.log(pkg);
-            return pkg;
+          try {
+            script: |
+              const { PackageURL } = require('packageurl-js');
+              const pkg = PackageURL.fromString(process.env.PURL.trim().replaceAll(/^`|`$/g,''));
+              console.log(pkg);
+              return pkg;
+          }
+          catch (ex) {
+              console.log(github.event.issue.labels);
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: 'Error parsing package url: ' + process.env.PURL + '.\n\nError: ' + ex + '\n\nPlease correct the package URL - consider copying the package url from the HTML report.'
+              })
+              throw new Error('Invalid package url');
+          }
 
       - name: Show Issue 2
         if: contains(github.event.issue.labels.*.name, 'pending more information')
@@ -100,19 +112,12 @@ jobs:
         with:
           script: |
               console.log(github.event.issue.labels);
-              await github.rest.issues.createComment({
-                issue_number: context.issue.number,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                body: 'Error parsing package url: ' + process.env.PURL + '.\n\nError: ' + ex + '\n\nPlease correct the package URL - consider copying the package url from the HTML report.'
-              })
               github.rest.issues.addLabels({
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 labels: ['pending more information']
               })
-              throw new Error('Invalid package url');
 
       - name: Show Issue 3
         if: contains(github.event.issue.labels.*.name, 'pending more information')
