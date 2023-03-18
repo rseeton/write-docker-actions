@@ -14,11 +14,6 @@ jobs:
       issues: write
     steps:
 
-      - name: Dump GitHub context
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-        run: echo "$GITHUB_CONTEXT"
-
       - name: View context attributes
         uses: actions/github-script@v6
         with:
@@ -29,14 +24,6 @@ jobs:
         uses: actions/github-script@v6.4.0
         with:
           script: |
-              console.log(
-              await github.rest.issues.listLabelsOnIssue
-              ({
-                issue_number: context.issue.number,
-                owner: context.repo.owner,
-                repo: context.repo.repo
-              })
-              )
               github.rest.issues.listEventsForTimeline({
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
@@ -54,6 +41,14 @@ jobs:
                 repo: context.repo.repo,
                 name: 'pending more information'
               })
+              console.log(
+              await github.rest.issues.listLabelsOnIssue
+              ({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo
+              })
+              )
 
       - uses: actions/checkout@v3
         with:
@@ -71,19 +66,9 @@ jobs:
           npm init -y
           npm install packageurl-js
 
-      - name: Assign triage Label
-        uses: actions/github-script@v6
-        with:
-          script: |
-            github.rest.issues.addLabels({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              labels: ["triage"]
-            })
-
-      - name: Assign PURL Label
-        uses: actions/github-script@v6
+      - name: Parse Package URL
+        id: purl-parser
+        uses: actions/github-script@v6.4.0
         env:
           PURL: ${{ fromJSON(steps.issue-parser.outputs.jsonString).purl }}
         with:
@@ -100,111 +85,23 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 body: 'Error parsing package url: ' + process.env.PURL + '.\n\nError: ' + ex + '\n\nPlease correct the package URL - consider copying the package url from the HTML report.'
-              })  
-              github.rest.issues.addLabels({
-                issue_number: context.issue.number,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                labels: ['pending more information']
-              })  
-              throw new Error('Invalid package url');
-            }   
-      - name: Parse Package URL
-        if: contains(github.event.issue.labels.*.name, 'pending more information')
-        continue-on-error: true
-        id: purl-parser
-        uses: actions/github-script@v6.4.0
-        env:
-          PURL: ${{ fromJSON(steps.issue-parser.outputs.jsonString).purl }}
-        with:
-          script: |
-            try {
-              const { PackageURL } = require('packageurl-js');
-              const pkg = PackageURL.fromString(process.env.PURL.trim().replaceAll(/^`|`$/g,''));
-              console.log(pkg);
-              return pkg;
-            }
-            catch (ex) {
-              await github.rest.issues.createComment({
-                issue_number: context.issue.number,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                body: 'Error parsing package url: ' + process.env.PURL + '.\n\nError: ' + ex + '\n\nPlease correct the package URL - consider copying the package url from the HTML report.'
               })
-              throw new Error('Invalid package url');
-            }
-
-      - name: Show Issue 2
-        if: contains(github.event.issue.labels.*.name, 'pending more information')
-        uses: actions/github-script@v6.4.0
-        with:
-          script: |
-              github.rest.issues.get({
-                issue_number: context.issue.number,
-                owner: context.repo.owner,
-                repo: context.repo.repo
-              })
-              console.log( await github.rest.issues.listLabelsOnIssue )
-
-      - name: Dump GitHub context
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-        run: echo "$GITHUB_CONTEXT"
-      - name: Dump job context
-        env:
-          JOB_CONTEXT: ${{ toJson(job) }}
-        run: echo "$JOB_CONTEXT"
-      - name: Dump steps context
-        env:
-          STEPS_CONTEXT: ${{ toJson(steps) }}
-        run: echo "$STEPS_CONTEXT"
-      - name: Dump runner context
-        env:
-          RUNNER_CONTEXT: ${{ toJson(runner) }}
-        run: echo "$RUNNER_CONTEXT"
-      - name: Dump strategy context
-        env:
-          STRATEGY_CONTEXT: ${{ toJson(strategy) }}
-        run: echo "$STRATEGY_CONTEXT"
-      - name: Dump matrix context
-        env:
-          MATRIX_CONTEXT: ${{ toJson(matrix) }}
-        run: echo "$MATRIX_CONTEXT"
-
-      - name: Show default environment variables
-        run: |
-          echo "The job_id is: $GITHUB_JOB"   # reference the default environment variables
-          echo "The id of this action is: $GITHUB_ACTION"   # reference the default environment variables
-          echo "The run id is: $GITHUB_RUN_ID"
-          echo "The GitHub Actor's username is: $GITHUB_ACTOR"
-          echo "GitHub SHA: $GITHUB_SHA"
-
-      - name: Parse Package URL Failed
-        if: steps.purl-parser.outcome != 'success'
-        id: purl-parser-failure
-        uses: actions/github-script@v6.4.0
-        with:
-          script: |
               github.rest.issues.addLabels({
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 labels: ['pending more information']
               })
+              throw new Error('Invalid package url');
+            }
 
-      - name: Dump GitHub context
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-        run: echo "$GITHUB_CONTEXT"
-
-      - name: Show Issue 3
-        if: contains(github.event.issue.labels.*.name, 'pending more information')
-        uses: actions/github-script@v6.4.0
+      - name: Assign triage Label
+        uses: actions/github-script@v6
         with:
           script: |
-              console.log(github.event.issue.labels);
-              github.rest.issues.get({
-                issue_number: context.issue.number,
-                owner: context.repo.owner,
-                repo: context.repo.repo
-              })
+            github.rest.issues.addLabels({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: ["triage"]
+            })
