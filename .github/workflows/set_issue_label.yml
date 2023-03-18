@@ -30,7 +30,7 @@ jobs:
         with:
           script: |
               console.log(
-              github.rest.issues.labels
+              github.rest.issues.listLabelsOnIssue
               ({
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
