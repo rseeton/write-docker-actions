@@ -29,7 +29,14 @@ jobs:
         uses: actions/github-script@v6.4.0
         with:
           script: |
-              console.log(github.rest.issues.labels);
+              console.log(
+              github.rest.issues.labels
+              ({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo
+              })
+              )
               github.rest.issues.listEventsForTimeline({
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
