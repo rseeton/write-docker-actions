@@ -125,12 +125,12 @@ jobs:
         uses: actions/github-script@v6.4.0
         with:
           script: |
-              console.log(stdout);
               github.rest.issues.get({
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
                 repo: context.repo.repo
               })
+              console.log( await github.rest.issues.listLabelsOnIssue )
 
       - name: Dump GitHub context
         env:
